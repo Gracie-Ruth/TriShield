@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tri-Shield — AI Text Detector</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-top">
+      <span class="wordmark">Tri-Shield</span>
+      <span class="version-tag">v1.0 · Ensemble</span>
+    </div>
+    <h1>Detect <em>AI</em><br>Written Text</h1>
+    <p class="header-sub">Three-stream forensic analysis — semantic depth, syntactic patterns, and retrieval similarity, fused into a single verdict.</p>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#5a8ec8"></div>Semantic / FairDA</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#8e7ac8"></div>Syntactic / RF</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#5aada8"></div>Retrieval / RAD</div>
+    </div>
+  </header>
+
+  <!-- INPUT -->
+  <div class="input-section">
+    <div class="section-label">Input text</div>
+    <div class="textarea-wrap">
+      <textarea id="inputText" placeholder="Paste the text you want to examine here…" spellcheck="false"></textarea>
+      <div class="textarea-footer">
+        <span class="char-count"><span id="charCount">0</span> characters</span>
+        <button class="clear-btn" onclick="clearInput()">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUTTON -->
+  <div class="btn-wrap">
+    <button class="analyze-btn" id="analyzeBtn" onclick="runDetect()">
+      <div class="spinner" id="spinner"></div>
+      <span id="btnLabel">Run Analysis</span>
+    </button>
+    <div class="error-msg" id="errorMsg"></div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="results" id="results">
+
+    <!-- Verdict -->
+    <div class="verdict-card" id="verdictCard">
+      <div class="verdict-row">
+        <div class="verdict-left">
+          <div class="verdict-eyebrow">Verdict</div>
+          <div class="verdict-label" id="verdictLabel">—</div>
+        </div>
+        <div class="verdict-right">
+          <div class="stat-pair">
+            <div class="stat-label">Final probability</div>
+            <div class="stat-val" id="finalProb">—</div>
+          </div>
+          <div class="stat-pair">
+            <div class="stat-label">Confidence</div>
+            <div class="stat-val" id="confStat">—</div>
+          </div>
+        </div>
+      </div>
+      <div class="conf-row">
+        <div class="conf-header">
+          <span class="conf-text">Ensemble confidence</span>
+          <span class="conf-val" id="confVal">—</span>
+        </div>
+        <div class="conf-track">
+          <div class="conf-fill" id="confFill" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Overall insight -->
+    <div class="insight-card">
+      <div class="insight-quote-mark">"</div>
+      <div class="section-label" style="margin-bottom:12px;">Overall insight</div>
+      <p class="insight-body" id="overallInsight">—</p>
+    </div>
+
+    <!-- Streams -->
+    <div class="streams-card">
+      <div class="streams-header">Stream breakdown</div>
+
+      <!-- Semantic -->
+      <div class="stream-row">
+        <div class="stream-name">
+          <div class="stream-icon" style="background:#5a8ec8"></div>
+          Semantic — FairDA / DeBERTa-v3
+        </div>
+        <div class="stream-score" id="semScore" style="color:#5a8ec8">—</div>
+        <div class="stream-sub">Deep language model · [CLS] token embeddings</div>
+        <div class="stream-bar-wrap">
+          <div class="bar-track">
+            <div class="bar-fill" id="semBar" style="width:0%;background:#5a8ec8"></div>
+          </div>
+        </div>
+        <div class="stream-insight-row">
+          <span class="chip" id="semChip">—</span>
+          <span class="stream-insight-text" id="semInsight">—</span>
+        </div>
+      </div>
+
+      <!-- Syntactic -->
+      <div class="stream-row">
+        <div class="stream-name">
+          <div class="stream-icon" style="background:#8e7ac8"></div>
+          Syntactic — Random Forest
+        </div>
+        <div class="stream-score" id="synScore" style="color:#8e7ac8">—</div>
+        <div class="stream-sub">Sentence variance · function words · POS entropy</div>
+        <div class="stream-bar-wrap">
+          <div class="bar-track">
+            <div class="bar-fill" id="synBar" style="width:0%;background:#8e7ac8"></div>
+          </div>
+        </div>
+        <div class="stream-insight-row">
+          <span class="chip" id="synChip">—</span>
+          <span class="stream-insight-text" id="synInsight">—</span>
+        </div>
+      </div>
+
+      <!-- Retrieval -->
+      <div class="stream-row">
+        <div class="stream-name">
+          <div class="stream-icon" style="background:#5aada8"></div>
+          Retrieval — RAD / E5 + FAISS
+        </div>
+        <div class="stream-score" id="retScore" style="color:#5aada8">—</div>
+        <div class="stream-sub">Nearest-neighbour similarity · sentence embeddings</div>
+        <div class="stream-bar-wrap">
+          <div class="bar-track">
+            <div class="bar-fill" id="retBar" style="width:0%;background:#5aada8"></div>
+          </div>
+        </div>
+        <div class="stream-insight-row">
+          <span class="chip" id="retChip">—</span>
+          <span class="stream-insight-text" id="retInsight">—</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-left">Tri-Shield · <span>FairDA + RF + RAD</span> ensemble</div>
+    <div class="footer-streams">
+      <div class="footer-stream"><div class="stream-icon legend-dot" style="background:#5a8ec8;width:6px;height:6px;border-radius:50%"></div>DeBERTa-v3-base</div>
+      <div class="footer-stream"><div class="stream-icon legend-dot" style="background:#8e7ac8;width:6px;height:6px;border-radius:50%"></div>Random Forest</div>
+      <div class="footer-stream"><div class="stream-icon legend-dot" style="background:#5aada8;width:6px;height:6px;border-radius:50%"></div>E5 + FAISS</div>
+    </div>
+  </footer>
+
+</div>
+
+<script> src="index.js" </script>
+
+</body>
+</html>
